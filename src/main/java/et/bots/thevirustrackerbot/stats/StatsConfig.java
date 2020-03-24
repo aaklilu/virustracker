@@ -18,7 +18,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @ComponentScan
 @RequiredArgsConstructor
 @EnableScheduling
-@EnableJpaRepositories(basePackages = "com.paga.thevirustrackerbot.stats")
+@EnableJpaRepositories(basePackages = "et.bots.thevirustrackerbot.stats")
 @Import(EventConfig.class)
 public class StatsConfig {
 

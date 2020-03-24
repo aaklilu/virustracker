@@ -14,7 +14,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ComponentScan
 @Configuration
 @RequiredArgsConstructor
-@EnableJpaRepositories(basePackages = "com.paga.thevirustrackerbot.subscriber")
+@EnableJpaRepositories(basePackages = "et.bots.thevirustrackerbot.subscriber")
 public class SubscriberConfig {
 
     private final SubscriberRepository subscriberRepository;

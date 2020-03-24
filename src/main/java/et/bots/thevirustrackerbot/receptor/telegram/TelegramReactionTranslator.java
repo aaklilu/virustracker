@@ -17,33 +17,37 @@ public class TelegramReactionTranslator implements Processor {
 
         ReplyKeyboardMarkup replyKeyboardMarkup = null;
 
-        if (reaction.getOptionVector() != null && !reaction.getOptionVector().isEmpty()) {
-            replyKeyboardMarkup = ReplyKeyboardMarkup.builder()
-                    .oneTimeKeyboard(true)
-                    .removeKeyboard(true)
-                    .resizeKeyboard(false)
-                    .selective(false)
-                    .build();
+        if(reaction != null) {
+            if (reaction.getOptionVector() != null && !reaction.getOptionVector().isEmpty()) {
+                replyKeyboardMarkup = ReplyKeyboardMarkup.builder()
+                        .oneTimeKeyboard(true)
+                        .removeKeyboard(true)
+                        .resizeKeyboard(false)
+                        .selective(false)
+                        .build();
 
-            replyKeyboardMarkup
-                    .setKeyboard(reaction
-                            .getOptionVector()
-                            .stream()
-                            .map(options -> options
-                                    .stream()
-                                    .map(option -> InlineKeyboardButton
-                                            .builder()
-                                            .text(option.getText())
-                                            .callbackData(option.getCallbackData())
-                                            .build())
-                                    .collect(Collectors.toList()))
-                            .collect(Collectors.toList()));
+                replyKeyboardMarkup
+                        .setKeyboard(reaction
+                                .getOptionVector()
+                                .stream()
+                                .map(options -> options
+                                        .stream()
+                                        .map(option -> InlineKeyboardButton
+                                                .builder()
+                                                .text(option.getText())
+                                                .callbackData(option.getCallbackData())
+                                                .build())
+                                        .collect(Collectors.toList()))
+                                .collect(Collectors.toList()));
+            }
+
+            exchange.getIn().setBody(OutgoingTextMessage
+                    .builder()
+                    .text(reaction.getText())
+                    .replyMarkup(replyKeyboardMarkup)
+                    .build());
+        }else {
+            exchange.getIn().setBody(null);//make sure nothing gets sent out...just in case
         }
-
-        exchange.getIn().setBody(OutgoingTextMessage
-                .builder()
-                .text(reaction.getText())
-                .replyMarkup(replyKeyboardMarkup)
-                .build());
     }
 }

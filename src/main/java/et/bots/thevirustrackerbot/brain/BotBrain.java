@@ -37,7 +37,7 @@ public class BotBrain {
         for (String beanName : applicationContext.getBeanDefinitionNames()) {
             Class<?> type = applicationContext.getType(beanName);
 
-            if (type.getPackage() != null && StringUtils.startsWithIgnoreCase(type.getPackage().getName(), "com.paga.thevirustrackerbot.brain")) {
+            if (type.getPackage() != null && StringUtils.startsWithIgnoreCase(type.getPackage().getName(), "et.bots.thevirustrackerbot.brain")) {
                 methods.addAll(Arrays.asList(type.getDeclaredMethods()));
             }
 
@@ -61,13 +61,13 @@ public class BotBrain {
         return !effector.messagePattern.isEmpty() &&
                 stimuli.getSubscriber().getCurrentFlow().equals(effector.flow) &&
                 stimuli.getSubscriber().getCurrentState().equals(effector.state) &&
-                Pattern.compile(effector.messagePattern).matcher(stimuli.getMessage()).matches();
+                Pattern.compile(effector.messagePattern).matcher(stimuli.getMessage().toLowerCase()).matches();
     }
 
     @Handler
     public Reaction dispatch(Stimuli stimuli) {
 
-        log.info("Handling incoming stimulus: {}", stimuli);
+        log.info("Handling incoming stimuli: {}", stimuli);
         try {
 
             Optional<EffectorMethodWrapper> matchingMethod = effectors

@@ -20,7 +20,7 @@ public class StatsEventHandlers {
     @Value("${bot.events.queue-uri.main}")
     private String eventEndpointUrl;
 
-    @Consume(property = "eventEndpointUrl", predicate = "${body} is 'com.paga.thevirustrackerbot.event.v1.UpdateRequestedEvent'")
+    @Consume(property = "eventEndpointUrl", predicate = "${body} is 'et.bots.thevirustrackerbot.event.v1.UpdateRequestedEvent'")
     public CompletableFuture<Void> handleUpdateRequestedEvent(UpdateRequestedEvent event){
 
         dailyStatsService.updateStats(event.getCountryCode(), event.getTo());

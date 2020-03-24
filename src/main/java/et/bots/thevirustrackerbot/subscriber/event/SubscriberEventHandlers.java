@@ -35,7 +35,7 @@ public class SubscriberEventHandlers {
     @Value("${bot.messages.queue-uri.main}")
     private String messageQueueUrl;
 
-    @Consume(property = "eventEndpointUrl", predicate = "${body} is 'com.paga.thevirustrackerbot.event.v1.StatsUpdatedEvent'")
+    @Consume(property = "eventEndpointUrl", predicate = "${body} is 'et.bots.thevirustrackerbot.event.v1.StatsUpdatedEvent'")
     public CompletableFuture<Void> handleStatsUpdatedEvent(StatsUpdatedEvent event){
 
         List<List<Reaction.Option>> optionVector = new ArrayList<>();

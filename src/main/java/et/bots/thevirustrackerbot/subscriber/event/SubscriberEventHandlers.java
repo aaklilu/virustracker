@@ -67,7 +67,7 @@ public class SubscriberEventHandlers {
         if(!StringUtils.isEmpty(event.getSubscriberId())){
             subscriberService.findBySubscriptionId(event.getSubscriberId()).ifPresent(subscriber -> messageQueueProducerTemplate.sendBody(messageQueueUrl, Reaction.builder().subscriber(subscriber).text(text).optionVector(optionVector).build()));
         }else {
-            subscriberService.findAll().forEach(subscriber -> messageQueueProducerTemplate.sendBody(messageQueueUrl, Reaction.builder().subscriber(subscriber).text(text).optionVector(optionVector).build()));
+            subscriberService.findByCountryCode(event.getStatsDTO().getCountryCode()).forEach(subscriber -> messageQueueProducerTemplate.sendBody(messageQueueUrl, Reaction.builder().subscriber(subscriber).text(text).optionVector(optionVector).build()));
         }
 
         return CompletableFuture.completedFuture(null);

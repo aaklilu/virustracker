@@ -16,6 +16,11 @@ public class SubscriberServiceImpl implements SubscriberService {
     }
 
     @Override
+    public Iterable<Subscriber> findByCountryCode(String countryCode) {
+        return subscriberRepository.findByCountryCode(countryCode);
+    }
+
+    @Override
     public Optional<Subscriber> findBySubscriptionId(String subscriptionId) {
         return subscriberRepository.findBySubscriptionId(subscriptionId);
     }

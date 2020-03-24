@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface SubscriberRepository extends PagingAndSortingRepository<Subscriber, UUID> {
     Optional<Subscriber> findBySubscriptionId(String subscriptionId);
+    Iterable<Subscriber> findByCountryCode(String countryCode);
 }

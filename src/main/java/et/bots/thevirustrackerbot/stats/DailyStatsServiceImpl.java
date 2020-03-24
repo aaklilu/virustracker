@@ -98,6 +98,10 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                             statsDTO.setNewDeaths(dailyStats.getNewDeaths());
                             statsDTO.setNewRecoveries(dailyStats.getNewRecoveries());
 
+                            statsDTO.setTotalCases(dailyStats.getTotalCases());
+                            statsDTO.setTotalDeaths(dailyStats.getTotalDeaths());
+                            statsDTO.setTotalRecovered(dailyStats.getTotalRecovered());
+
                             eventProducerTemplate.sendBody(StatsUpdatedEvent.builder().subscriberId(subscriberId).statsDTO(statsDTO).build());
                         }
                     });

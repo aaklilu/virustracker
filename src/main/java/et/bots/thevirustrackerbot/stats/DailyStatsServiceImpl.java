@@ -89,6 +89,11 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                             dailyStats.setTotalRecovered(statsDTO.getTotalRecovered());
 
                             this.update(dailyStats);
+
+                            //update the dto as well...it doesn't contail.n vales for NEW cases as its calculated here
+                            statsDTO.setNewCases(dailyStats.getNewCases());
+                            statsDTO.setNewDeaths(dailyStats.getNewDeaths());
+                            statsDTO.setNewRecoveries(dailyStats.getNewRecoveries());
                             eventProducerTemplate.sendBody(StatsUpdatedEvent.builder().statsDTO(statsDTO).build());
                         }else if(!StringUtils.isEmpty(subscriberId)){
 

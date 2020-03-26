@@ -1,0 +1,36 @@
+version: '3.2'
+
+services:
+  bot:
+    build:
+      context: .
+      args:
+      - APP_VERSION=0.0.1-SNAPSHOT
+    container_name: tvt_bot
+    ports:
+      - "8880:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/${VIRUS_TRACKER_BOT_DB_NAME}?reWriteBatchedInserts=true
+      - DB_SCHEMA=${VIRUS_TRACKER_BOT_DB_SCHEMA}
+      - DB_USER=${VIRUS_TRACKER_BOT_DB_USER}
+      - DB_PASSWORD=${VIRUS_TRACKER_BOT_DB_PASSWORD}
+      - TELEGRAM_BOT_API_TOKEN=${VIRUS_TRACKER_BOT_TELEGRAM_AUTH_TOKEN}
+  db:
+    environment:
+      - POSTGRES_USER=${VIRUS_TRACKER_BOT_DB_USER}
+      - POSTGRES_PASSWORD=${VIRUS_TRACKER_BOT_DB_PASSWORD}
+      - POSTGRES_DB=${VIRUS_TRACKER_BOT_DB_NAME}
+    image: postgres:11.5
+    container_name: tvtbot-data
+    volumes:
+      - tvtbot_postgres:/var/lib/postgresql
+      # This needs explicit mapping due to https://github.com/docker-library/postgres/blob/4e48e3228a30763913ece952c611e5e9b95c8759/Dockerfile.template#L52
+      - tvtbot_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"  #host:guest
+volumes:
+  tvtbot_postgres:
+  tvtbot_postgres_data:
+  tvtbot_kafka_data:

@@ -1,5 +1,5 @@
 
-package et.bots.thevirustrackerbot.stats.integration.virustracker.domain;
+package et.bots.thevirustrackerbot.stats.integration.herokuvt.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

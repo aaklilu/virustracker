@@ -1,6 +1,7 @@
 package et.bots.thevirustrackerbot.stats;
 
 import et.bots.thevirustrackerbot.StatsDTO;
+import et.bots.thevirustrackerbot.event.v1.StatsUpdateFailedEvent;
 import et.bots.thevirustrackerbot.event.v1.StatsUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class DailyStatsServiceImpl implements DailyStatsService {
 
-    private static final long TIMEOUT_VALUE=60;
+    private static final long TIMEOUT_VALUE=120;
     private static final TimeUnit TIMEOUT_UNIT=TimeUnit.SECONDS;
 
     private final DailyStatsRepository dailyStatsRepository;
@@ -112,6 +113,26 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                     });
         } catch (Exception e) {
             log.error("Unable to update status: {}" ,e.getMessage(), e);
+            if(!StringUtils.isEmpty(subscriberId)){
+                Optional<DailyStats> existing = this.findByCountryCodeProvinceAndDateRange(countryCode, null, LocalDate.now().atStartOfDay(), LocalDateTime.now());
+
+                if(existing.isPresent()){
+                    DailyStats dailyStats = existing.get();
+                    StatsDTO statsDTO = StatsDTO
+                            .builder()
+                            .newCases(dailyStats.getNewCases())
+                            .newDeaths(dailyStats.getNewDeaths())
+                            .newRecoveries(dailyStats.getNewRecoveries())
+                            .totalCases(dailyStats.getTotalCases())
+                            .totalDeaths(dailyStats.getTotalDeaths())
+                            .totalRecovered(dailyStats.getTotalRecovered())
+                            .build();
+
+                    eventProducerTemplate.sendBody(StatsUpdateFailedEvent.builder().subscriberId(subscriberId).statsDTO(statsDTO).build());
+                }else{
+                    eventProducerTemplate.sendBody(StatsUpdateFailedEvent.builder().subscriberId(subscriberId).build());
+                }
+            }
         }
     }
 }

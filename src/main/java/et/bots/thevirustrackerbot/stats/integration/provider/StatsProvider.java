@@ -10,6 +10,7 @@ import java.util.Map;
 @Builder
 public class StatsProvider {
 
+    private int failoverOrder;
     private String id;
     private String name;
     private String countryCode;

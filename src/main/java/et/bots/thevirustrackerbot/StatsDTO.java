@@ -16,7 +16,10 @@ public class StatsDTO {
     private Integer totalCases;
     private Integer totalDeaths;
     private Integer totalRecovered;
-    private Integer newCases;
-    private Integer newDeaths;
-    private Integer newRecoveries;
+    @Builder.Default
+    private Integer newCases=0;
+    @Builder.Default
+    private Integer newDeaths=0;
+    @Builder.Default
+    private Integer newRecoveries=0;
 }

@@ -1,7 +1,10 @@
 package et.bots.thevirustrackerbot.subscriber.event;
 
 import et.bots.thevirustrackerbot.Reaction;
+import et.bots.thevirustrackerbot.StatsDTO;
+import et.bots.thevirustrackerbot.event.v1.StatsUpdateFailedEvent;
 import et.bots.thevirustrackerbot.event.v1.StatsUpdatedEvent;
+import et.bots.thevirustrackerbot.subscriber.Subscriber;
 import et.bots.thevirustrackerbot.subscriber.SubscriberService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,36 @@ public class SubscriberEventHandlers {
     @Consume(property = "eventEndpointUrl", predicate = "${body} is 'et.bots.thevirustrackerbot.event.v1.StatsUpdatedEvent'")
     public CompletableFuture<Void> handleStatsUpdatedEvent(StatsUpdatedEvent event){
 
+        if(!StringUtils.isEmpty(event.getSubscriberId())){
+
+            subscriberService.findBySubscriptionId(event.getSubscriberId()).ifPresent(subscriber -> {
+                messageQueueProducerTemplate.sendBody(messageQueueUrl, buildReaction("status.update.title", subscriber, event.getStatsDTO()));
+            });
+        }else {
+            subscriberService.findByCountryCode(event.getStatsDTO().getCountryCode()).forEach(subscriber -> {
+
+                messageQueueProducerTemplate.sendBody(messageQueueUrl, buildReaction("status.update.title", subscriber, event.getStatsDTO()));
+            });
+        }
+
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Consume(property = "eventEndpointUrl", predicate = "${body} is 'et.bots.thevirustrackerbot.event.v1.StatsUpdateFailedEvent'")
+    public CompletableFuture<Void> handleStatsUpdateFailedEvent(StatsUpdateFailedEvent event){
+
+        if(!StringUtils.isEmpty(event.getSubscriberId())){
+
+            subscriberService.findBySubscriptionId(event.getSubscriberId()).ifPresent(subscriber -> {
+                messageQueueProducerTemplate.sendBody(messageQueueUrl, buildReaction(event.getStatsDTO()!= null? "status.update.error.title": "status.update.error.no-stats.title", subscriber, event.getStatsDTO()));
+            });
+        }
+
+        return CompletableFuture.completedFuture(null);
+    }
+
+    private Reaction buildReaction(String titleKey, Subscriber subscriber, StatsDTO statsDTO){
+
         List<List<Reaction.Option>> optionVector = new ArrayList<>();
         optionVector.add(Collections.singletonList(Reaction.Option
                 .builder()
@@ -45,32 +78,29 @@ public class SubscriberEventHandlers {
                 .text(messageSource.getMessage("button.refresh", new Object[]{}, LocaleContextHolder.getLocale()))
                 .build()));
 
-        String text = messageSource.getMessage("status.update.title", new Object[]{new Locale("", event.getStatsDTO().getCountryCode().toUpperCase()).getDisplayCountry()}, LocaleContextHolder.getLocale()) +
-                "\r\n" +
-                messageSource.getMessage("status.update.section.new", new Object[]{}, LocaleContextHolder.getLocale()) +
-                "\r\n" +
-                messageSource.getMessage("status.update.confirmed", new Object[]{}, LocaleContextHolder.getLocale())+ ": " + event.getStatsDTO().getNewCases() +
-                "\r\n" +
-                messageSource.getMessage("status.update.deaths", new Object[]{}, LocaleContextHolder.getLocale())+ ": " + event.getStatsDTO().getNewDeaths() +
-                "\r\n" +
-                messageSource.getMessage("status.update.recovered", new Object[]{}, LocaleContextHolder.getLocale())+ ": " + event.getStatsDTO().getNewRecoveries() +
-                "\r\n" +
-                "\r\n" +
-                messageSource.getMessage("status.update.section.total", new Object[]{}, LocaleContextHolder.getLocale()) +
-                "\r\n" +
-                messageSource.getMessage("status.update.confirmed", new Object[]{}, LocaleContextHolder.getLocale())+ ": " + event.getStatsDTO().getTotalCases() +
-                "\r\n" +
-                messageSource.getMessage("status.update.deaths", new Object[]{}, LocaleContextHolder.getLocale())+ ": " + event.getStatsDTO().getTotalDeaths() +
-                "\r\n" +
-                messageSource.getMessage("status.update.recovered", new Object[]{}, LocaleContextHolder.getLocale())+ ": " + event.getStatsDTO().getTotalRecovered();
+        String text = messageSource.getMessage(titleKey, new Object[]{new Locale("", subscriber.getCountryCode().toUpperCase()).getDisplayCountry()}, LocaleContextHolder.getLocale());
 
-        if(!StringUtils.isEmpty(event.getSubscriberId())){
-            subscriberService.findBySubscriptionId(event.getSubscriberId()).ifPresent(subscriber -> messageQueueProducerTemplate.sendBody(messageQueueUrl, Reaction.builder().subscriber(subscriber).text(text).optionVector(optionVector).build()));
-        }else {
-            subscriberService.findByCountryCode(event.getStatsDTO().getCountryCode()).forEach(subscriber -> messageQueueProducerTemplate.sendBody(messageQueueUrl, Reaction.builder().subscriber(subscriber).text(text).optionVector(optionVector).build()));
-        }
+                if(statsDTO != null) {
+                   text += "\r\n" +
+                            messageSource.getMessage("status.update.section.new", new Object[]{}, LocaleContextHolder.getLocale()) +
+                            "\r\n" +
+                            messageSource.getMessage("status.update.confirmed", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getNewCases() +
+                            "\r\n" +
+                            messageSource.getMessage("status.update.deaths", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getNewDeaths() +
+                            "\r\n" +
+                            messageSource.getMessage("status.update.recovered", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getNewRecoveries() +
+                            "\r\n" +
+                            "\r\n" +
+                            messageSource.getMessage("status.update.section.total", new Object[]{}, LocaleContextHolder.getLocale()) +
+                            "\r\n" +
+                            messageSource.getMessage("status.update.confirmed", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getTotalCases() +
+                            "\r\n" +
+                            messageSource.getMessage("status.update.deaths", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getTotalDeaths() +
+                            "\r\n" +
+                            messageSource.getMessage("status.update.recovered", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getTotalRecovered();
+                }
 
-        return CompletableFuture.completedFuture(null);
+        return Reaction.builder().text(text).subscriber(subscriber).optionVector(optionVector).build();
     }
 
 }

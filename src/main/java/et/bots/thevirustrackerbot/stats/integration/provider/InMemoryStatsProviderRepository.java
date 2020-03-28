@@ -2,9 +2,11 @@ package et.bots.thevirustrackerbot.stats.integration.provider;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class InMemoryStatsProviderRepository implements StatsProviderRepository, Iterable<StatsProvider> {
@@ -39,10 +41,10 @@ public class InMemoryStatsProviderRepository implements StatsProviderRepository,
 
         for (StatsProvider statsProvider : statsProviders) {
 
-            if (result.containsKey(statsProvider.getId())) {
-                throw new IllegalStateException(String.format("Duplicate key %s", statsProvider.getId()));
+            if (result.containsKey(statsProvider.getName())) {
+                throw new IllegalStateException(String.format("Duplicate key %s", statsProvider.getName()));
             }
-            result.put(statsProvider.getId(), statsProvider);
+            result.put(statsProvider.getName(), statsProvider);
 
         }
         return Collections.unmodifiableMap(result);
@@ -60,9 +62,28 @@ public class InMemoryStatsProviderRepository implements StatsProviderRepository,
 
     @Override
     public StatsProvider findById(String id) {
-        Assert.notNull(id, "id cannot be empty");
+        Assert.notNull(id, "name cannot be empty");
 
         return this.statsProviders.get(id);
+    }
+
+    @Override
+    public Set<StatsProvider> findAllByCountryOrGlobal(String countryCode) {
+        Set<StatsProvider> providers = StringUtils.isEmpty(countryCode)? new LinkedHashSet<>(): statsProviders
+                .values()
+                .stream()
+                .filter(value -> countryCode.equalsIgnoreCase(value.getCountryCode()))
+                .sorted(Comparator.comparingInt(StatsProvider::getFailoverOrder))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        providers.addAll(statsProviders
+                .values()
+                .stream()
+                .filter(value -> StringUtils.isEmpty(value.getCountryCode()))
+                .sorted(Comparator.comparingInt(StatsProvider::getFailoverOrder))
+                .collect(Collectors.toCollection(LinkedHashSet::new)));
+
+        return providers;
     }
 
     /**

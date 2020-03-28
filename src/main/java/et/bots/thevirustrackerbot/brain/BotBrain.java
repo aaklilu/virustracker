@@ -13,12 +13,11 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -90,7 +89,11 @@ public class BotBrain {
             }else{
 
                 log.error("Unknown command {} ", stimuli.getMessage());
-                result.set(Reaction.builder().text(messageSource.getMessage("error.unknown_command", new Object[]{}, LocaleContextHolder.getLocale())).build());
+                result.set(Reaction
+                        .builder()
+                        .text(messageSource.getMessage("error.unknown_command", new Object[]{}, LocaleContextHolder.getLocale()))
+                        .optionVector(getKnownCommandsOptions())
+                        .build());
             }
 
             return result.get();
@@ -98,6 +101,16 @@ public class BotBrain {
             log.error(e.getMessage(), e);
             return Reaction.builder().text(messageSource.getMessage("error.sick", new Object[]{}, LocaleContextHolder.getLocale())).build();
         }
+    }
+
+    private List<List<Reaction.Option>> getKnownCommandsOptions(){
+        String commands = messageSource.getMessage("known-commands", new Object[]{}, LocaleContextHolder.getLocale());
+
+        return Stream.of(commands.split(",")).map(s -> Collections.singletonList(Reaction.Option
+                .builder()
+                .text(s)
+                .callbackData(s)
+                .build())).collect(Collectors.toList());
     }
 
     private static class EffectorMethodWrapper {

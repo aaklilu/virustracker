@@ -28,7 +28,7 @@ public class RapidApiVTGetCountryStatsRequestBuilder implements GetCountryStatsR
         if(!StringUtils.isEmpty(countryCode)) {
 
             String countryName = new Locale("", countryCode.toUpperCase()).getDisplayName();
-            exchange.getIn().setHeader(Exchange.HTTP_QUERY, "country=" + countryName);
+            exchange.getIn().setHeader(Exchange.HTTP_QUERY, "country=" + (countryName.contains(" ")? countryCode: countryName));
         }
 
         exchange.getIn().setHeader(HEADER_RAPID_API_KEY, statsProvider.getMetadata().get(METADATA_API_KEY));

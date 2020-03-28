@@ -45,6 +45,8 @@ public class Subscriber {
     private String phoneNumber;
     private String countryCode;
     private String languageCode;
+    private String organizationName;
+    private String position;
 
     private Long latitude;
     private Long longitude;
@@ -57,4 +59,7 @@ public class Subscriber {
     private State currentState = State.LANDING;
     @Enumerated(EnumType.STRING)
     private Channel channel;
+
+    @Column(columnDefinition = "boolean Default false")
+    private boolean isSource;
 }

@@ -11,6 +11,8 @@ import java.util.List;
 public class Reaction {
     private final String text;
     private Subscriber subscriber;
+    @Builder.Default
+    private boolean inline=true;
     private final List<List<Option>> optionVector;
 
     @Data

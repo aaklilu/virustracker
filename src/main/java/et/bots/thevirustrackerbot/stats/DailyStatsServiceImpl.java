@@ -62,10 +62,13 @@ public class DailyStatsServiceImpl implements DailyStatsService {
             List<StatsDTO> statsDTOs = statsProducerTemplate.asyncRequestBodyAndHeader(StatsConstants.ENDPOINT_GET_STATS,"", StatsConstants.HEADER_COUNTRY_CODE, countryCode, List.class).get(TIMEOUT_VALUE, TIMEOUT_UNIT);
             statsDTOs
                     .stream()
-                    .filter(statsDTO -> !StringUtils.isEmpty(statsDTO.getCountryCode()))
+                    .filter(statsDTO -> !StringUtils.isEmpty(statsDTO.getCountryCode())
+                            && (StringUtils.isEmpty(countryCode) ||(!StringUtils.isEmpty(countryCode) && statsDTO.getCountryCode().equalsIgnoreCase(countryCode))))
                     .collect(Collectors.groupingBy(StatsDTO::getCountryCode, Collectors.collectingAndThen(Collectors.toList(), list -> StatsDTO
                             .builder()
-                            .countryCode(list.get(0).getCountryCode())
+                            .countryCode(list.stream().findFirst().get().getCountryCode())
+                            .sourceName(list.stream().findFirst().get().getSourceName())
+                            .sourceType(list.stream().findFirst().get().getSourceType())
                             .newCases(list.stream().mapToInt(StatsDTO::getNewCases).sum())
                             .newDeaths( list.stream().mapToInt(StatsDTO::getNewDeaths).sum())
                             .newRecoveries( list.stream().mapToInt(StatsDTO::getNewRecoveries).sum())
@@ -92,6 +95,7 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                                     .newCases(0)
                                     .newDeaths(0)
                                     .newRecoveries(0)
+                                    .sourceName(statsDTO.getSourceName())
                                     .build());
 
                             eventProducerTemplate.sendBody(StatsUpdatedEvent.builder().statsDTO(statsDTO).build());
@@ -107,6 +111,7 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                             dailyStats.setTotalCases(statsDTO.getTotalCases());
                             dailyStats.setTotalDeaths(statsDTO.getTotalDeaths());
                             dailyStats.setTotalRecovered(statsDTO.getTotalRecovered());
+                            dailyStats.setSourceName(statsDTO.getSourceName());
 
                             this.update(dailyStats);
 
@@ -126,6 +131,8 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                             statsDTO.setTotalCases(dailyStats.getTotalCases());
                             statsDTO.setTotalDeaths(dailyStats.getTotalDeaths());
                             statsDTO.setTotalRecovered(dailyStats.getTotalRecovered());
+                            statsDTO.setSourceType(dailyStats.getSourceType());
+                            statsDTO.setSourceName(dailyStats.getSourceName());
 
                             eventProducerTemplate.sendBody(StatsUpdatedEvent.builder().subscriberId(subscriberId).statsDTO(statsDTO).build());
                         }
@@ -145,6 +152,8 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                             .totalCases(dailyStats.getTotalCases())
                             .totalDeaths(dailyStats.getTotalDeaths())
                             .totalRecovered(dailyStats.getTotalRecovered())
+                            .sourceName(dailyStats.getSourceName())
+                            .sourceType(dailyStats.getSourceType())
                             .build();
 
                     eventProducerTemplate.sendBody(StatsUpdateFailedEvent.builder().subscriberId(subscriberId).statsDTO(statsDTO).build());

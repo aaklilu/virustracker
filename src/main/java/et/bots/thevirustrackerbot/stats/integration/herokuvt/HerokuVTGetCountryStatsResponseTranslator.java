@@ -2,6 +2,7 @@ package et.bots.thevirustrackerbot.stats.integration.herokuvt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import et.bots.thevirustrackerbot.StatsDTO;
+import et.bots.thevirustrackerbot.stats.StatsConstants;
 import et.bots.thevirustrackerbot.stats.integration.GetCountryStatsResponseTranslator;
 import et.bots.thevirustrackerbot.stats.integration.herokuvt.domain.HerokuStats;
 import et.bots.thevirustrackerbot.stats.integration.provider.StatsProvider;
@@ -20,6 +21,7 @@ public class HerokuVTGetCountryStatsResponseTranslator implements GetCountryStat
     @Override
     public void process(Exchange exchange) throws Exception {
 
+        StatsProvider statsProvider = exchange.getProperty(StatsConstants.PROPERTY_STATS_PROVIDER, StatsProvider.class);
         ObjectMapper mapper = new ObjectMapper();
         HerokuStats stats = mapper.readValue(exchange.getIn().getBody(String.class), HerokuStats.class);
 
@@ -32,6 +34,7 @@ public class HerokuVTGetCountryStatsResponseTranslator implements GetCountryStat
                 .totalCases(location.getLatest().getConfirmed())
                 .totalDeaths(location.getLatest().getDeaths())
                 .totalRecovered(location.getLatest().getRecovered())
+                .sourceName(statsProvider.getName())
                 .build()).collect(Collectors.toList()));
     }
 }

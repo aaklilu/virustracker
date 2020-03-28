@@ -1,6 +1,7 @@
 package et.bots.thevirustrackerbot.stats;
 
 
+import et.bots.thevirustrackerbot.SourceType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -49,4 +50,10 @@ public class DailyStats {
     private Integer newCases;
     private Integer newDeaths;
     private Integer newRecoveries;
+
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(50) Default 'API'")
+    @Builder.Default
+    private SourceType sourceType = SourceType.API;
+    private String sourceName;
 }

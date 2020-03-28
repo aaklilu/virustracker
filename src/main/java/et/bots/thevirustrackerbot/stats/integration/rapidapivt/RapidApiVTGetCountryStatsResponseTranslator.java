@@ -2,6 +2,7 @@ package et.bots.thevirustrackerbot.stats.integration.rapidapivt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import et.bots.thevirustrackerbot.StatsDTO;
+import et.bots.thevirustrackerbot.stats.StatsConstants;
 import et.bots.thevirustrackerbot.stats.integration.GetCountryStatsResponseTranslator;
 import et.bots.thevirustrackerbot.stats.integration.provider.StatsProvider;
 import et.bots.thevirustrackerbot.stats.integration.rapidapivt.domain.RapidApiStats;
@@ -32,6 +33,7 @@ public class RapidApiVTGetCountryStatsResponseTranslator implements GetCountrySt
     @Override
     public void process(Exchange exchange) throws Exception {
 
+        StatsProvider statsProvider = exchange.getProperty(StatsConstants.PROPERTY_STATS_PROVIDER, StatsProvider.class);
         ObjectMapper mapper = new ObjectMapper();
         RapidApiStats stats = mapper.readValue(exchange.getIn().getBody(String.class), RapidApiStats.class);
 
@@ -42,6 +44,7 @@ public class RapidApiVTGetCountryStatsResponseTranslator implements GetCountrySt
                 .totalCases(stat.getConfirmed())
                 .totalDeaths(stat.getDeaths())
                 .totalRecovered(stat.getRecovered())
+                .sourceName(statsProvider.getName())
                 .build()).collect(Collectors.toList()));
     }
 }

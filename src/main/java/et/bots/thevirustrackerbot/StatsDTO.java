@@ -8,6 +8,7 @@ import java.util.Date;
 @Data
 @Builder
 public class StatsDTO {
+
     private String countryCode;
     private String province;
     private String latitude;
@@ -22,4 +23,9 @@ public class StatsDTO {
     private Integer newDeaths=0;
     @Builder.Default
     private Integer newRecoveries=0;
+
+    @Builder.Default
+    private SourceType sourceType=SourceType.API;
+
+    private String sourceName;
 }

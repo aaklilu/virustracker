@@ -75,7 +75,7 @@ public class Effectors {
                 .countryCode(subscriber.getCountryCode())
                 .build()
         );
-        
+
         return Reaction
                 .builder()
                 .subscriber(subscriber)

@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -28,6 +29,11 @@ public class DailyStatsServiceImpl implements DailyStatsService {
     @Override
     public Iterable<DailyStats> findAll() {
         return dailyStatsRepository.findAll();
+    }
+
+    @Override
+    public Optional<DailyStats> findLatestStats(String countryCode) {
+        return dailyStatsRepository.findFirstByCountryCodeOrderByDateDesc(countryCode);
     }
 
     @Override
@@ -55,6 +61,19 @@ public class DailyStatsServiceImpl implements DailyStatsService {
         try {
             List<StatsDTO> statsDTOs = statsProducerTemplate.asyncRequestBodyAndHeader(StatsConstants.ENDPOINT_GET_STATS,"", StatsConstants.HEADER_COUNTRY_CODE, countryCode, List.class).get(TIMEOUT_VALUE, TIMEOUT_UNIT);
             statsDTOs
+                    .stream()
+                    .filter(statsDTO -> !StringUtils.isEmpty(statsDTO.getCountryCode()))
+                    .collect(Collectors.groupingBy(StatsDTO::getCountryCode, Collectors.collectingAndThen(Collectors.toList(), list -> StatsDTO
+                            .builder()
+                            .countryCode(list.get(0).getCountryCode())
+                            .newCases(list.stream().mapToInt(StatsDTO::getNewCases).sum())
+                            .newDeaths( list.stream().mapToInt(StatsDTO::getNewDeaths).sum())
+                            .newRecoveries( list.stream().mapToInt(StatsDTO::getNewRecoveries).sum())
+                            .totalCases( list.stream().mapToInt(StatsDTO::getTotalCases).sum())
+                            .totalDeaths( list.stream().mapToInt(StatsDTO::getTotalDeaths).sum())
+                            .totalRecovered( list.stream().mapToInt(StatsDTO::getTotalRecovered).sum())
+                            .build())))
+                    .values()
                     .forEach(statsDTO -> {
 
                         Optional<DailyStats> existing = this.findByCountryCodeProvinceAndDateRange(statsDTO.getCountryCode(), statsDTO.getProvince(), LocalDate.now().atStartOfDay(), LocalDateTime.now());
@@ -114,7 +133,7 @@ public class DailyStatsServiceImpl implements DailyStatsService {
         } catch (Exception e) {
             log.error("Unable to update status: {}" ,e.getMessage(), e);
             if(!StringUtils.isEmpty(subscriberId)){
-                Optional<DailyStats> existing = this.findByCountryCodeProvinceAndDateRange(countryCode, null, LocalDate.now().atStartOfDay(), LocalDateTime.now());
+                Optional<DailyStats> existing = this.findLatestStats(countryCode);
 
                 if(existing.isPresent()){
                     DailyStats dailyStats = existing.get();

@@ -9,4 +9,5 @@ import java.util.UUID;
 public interface DailyStatsRepository extends CrudRepository<DailyStats, UUID> {
 
     Optional<DailyStats> findByCountryCodeAndProvinceAndDateBetween(String countryCode, String province, LocalDateTime from, LocalDateTime to);
+    Optional<DailyStats> findFirstByCountryCodeOrderByDateDesc(String countryCode);
 }

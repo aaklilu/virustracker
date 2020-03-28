@@ -54,7 +54,7 @@ public class Effectors {
     @EffectorMapping(flow = Flow.START, state = State.COUNTRY, stimulus = "^\\S*")
     public Reaction country(Stimuli stimuli){
 
-        String countryCode=countries.get(stimuli.getMessage());
+        String countryCode=countries.get(stimuli.getMessage()) != null? countries.get(stimuli.getMessage()).toUpperCase(): stimuli.getMessage().toUpperCase();
         if(StringUtils.isEmpty(countryCode)){
 
             return Reaction
@@ -65,7 +65,7 @@ public class Effectors {
         }
 
         Subscriber subscriber = stimuli.getSubscriber();
-        subscriber.setCountryCode(countries.get(stimuli.getMessage()));
+        subscriber.setCountryCode(countryCode);
         subscriber.setCurrentFlow(Flow.TRACK);
         subscriber.setCurrentState(State.TRACK);
 
@@ -75,11 +75,16 @@ public class Effectors {
                 .countryCode(subscriber.getCountryCode())
                 .build()
         );
-
+        
         return Reaction
                 .builder()
                 .subscriber(subscriber)
                 .text(messageSource.getMessage("message.subscribed", new Object[]{}, LocaleContextHolder.getLocale()))
+                .optionVector(Collections.singletonList(Collections.singletonList(Reaction.Option
+                        .builder()
+                        .callbackData("refresh")
+                        .text(messageSource.getMessage("button.refresh", new Object[]{}, LocaleContextHolder.getLocale()))
+                        .build())))
                 .build();
     }
 

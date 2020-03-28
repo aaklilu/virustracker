@@ -37,7 +37,7 @@ public class RapidApiVTGetCountryStatsResponseTranslator implements GetCountrySt
 
         exchange.getIn().setBody(stats.getData().getCovid19Stats().stream().map(stat -> StatsDTO
                 .builder()
-                .countryCode(countries.get(stat.getCountry()))
+                .countryCode(countries.get(stat.getCountry()) != null? countries.get(stat.getCountry()).toUpperCase(): stat.getCountry().toUpperCase())
                 .province(stat.getProvince())
                 .totalCases(stat.getConfirmed())
                 .totalDeaths(stat.getDeaths())

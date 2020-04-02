@@ -15,5 +15,6 @@ ARG DEPENDENCY=/workspace/app/build/dependency
 COPY --from=builder ${DEPENDENCY}/dependencies/ ./
 COPY --from=builder ${DEPENDENCY}/snapshot-dependencies/ ./
 COPY --from=builder ${DEPENDENCY}/resources/ ./
+RUN true
 COPY --from=builder ${DEPENDENCY} ./
 ENTRYPOINT ["java", "-Dspring.profiles.active=${SPRING_PROFILE}", "org.springframework.boot.loader.JarLauncher"]

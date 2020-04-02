@@ -1,13 +1,19 @@
-FROM adoptopenjdk:11-jre-hotspot as builder
-WORKDIR application
-ARG JAR_FILE=build/libs/tvt_bot-0.0.1-SNAPSHOT.jar
-COPY ${JAR_FILE} tvt_bot-0.0.1-SNAPSHOT.jar
-RUN java -Djarmode=layertools -jar tvt_bot-0.0.1-SNAPSHOT.jar extract
+FROM gradle:6.3-jdk8 as builder
+WORKDIR /workspace/app
+VOLUME /tmp
 
-FROM adoptopenjdk:11-jre-hotspot
-WORKDIR application
-COPY --from=builder application/dependencies/ ./
-COPY --from=builder application/snapshot-dependencies/ ./
-COPY --from=builder application/resources/ ./
-COPY --from=builder application/application/ ./
-ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
+COPY gradle $APP_HOME/gradle
+RUN gradle build || return 0
+COPY . .
+RUN gradle bootJar
+
+RUN mkdir -p build/dependency && (cd build/dependency; java -Djarmode=layertools -jar ../libs/*.jar extract)
+
+FROM openjdk:8-jre-alpine
+VOLUME /tmp
+ARG DEPENDENCY=/workspace/app/build/dependency
+COPY --from=builder ${DEPENDENCY}/dependencies/ ./
+COPY --from=builder ${DEPENDENCY}/snapshot-dependencies/ ./
+COPY --from=builder ${DEPENDENCY}/resources/ ./
+COPY --from=builder ${DEPENDENCY} ./
+ENTRYPOINT ["java", "-Dspring.profiles.active=${SPRING_PROFILE}", "org.springframework.boot.loader.JarLauncher"]

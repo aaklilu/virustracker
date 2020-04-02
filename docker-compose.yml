@@ -11,18 +11,9 @@ services:
       - "8880:8080"
     depends_on:
       - db
-    environment:
-      - DB_URL=jdbc:postgresql://db:5432/${VIRUS_TRACKER_BOT_DB_NAME}?reWriteBatchedInserts=true
-      - DB_SCHEMA=${VIRUS_TRACKER_BOT_DB_SCHEMA}
-      - DB_USER=${VIRUS_TRACKER_BOT_DB_USER}
-      - DB_PASSWORD=${VIRUS_TRACKER_BOT_DB_PASSWORD}
-      - TELEGRAM_BOT_API_TOKEN=${VIRUS_TRACKER_BOT_TELEGRAM_AUTH_TOKEN}
-      - VIRUS_TRACKER_RAPID_API_KEY=${VIRUS_TRACKER_RAPID_API_KEY}
+    env_file: .env
   db:
-    environment:
-      - POSTGRES_USER=${VIRUS_TRACKER_BOT_DB_USER}
-      - POSTGRES_PASSWORD=${VIRUS_TRACKER_BOT_DB_PASSWORD}
-      - POSTGRES_DB=${VIRUS_TRACKER_BOT_DB_NAME}
+    env_file: .env
     image: postgres:11.5
     container_name: tvtbot-data
     volumes:

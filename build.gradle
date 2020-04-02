@@ -24,12 +24,15 @@ repositories {
 }
 
 dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	runtimeOnly 'org.postgresql:postgresql'
 	implementation 'org.apache.camel.springboot:camel-spring-boot-starter:3.1.0'
 	implementation 'org.apache.camel.springboot:camel-http-starter:3.1.0'
 	implementation 'org.apache.camel.springboot:camel-telegram-starter:3.1.0'
 	implementation 'org.apache.camel.springboot:camel-jackson-starter:3.1.0'
+	implementation 'org.apache.camel.springboot:camel-servlet-starter:3.1.0'
+	implementation 'com.github.messenger4j:messenger4j:1.1.0'
 
 	implementation 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

@@ -27,7 +27,7 @@ public class StatsIntegrationRoutes extends RouteBuilder {
             Integer retry = exchange.getProperty(StatsConstants.PROPERTY_RETRY_COUNT, Integer.class);
 
             exchange.setProperty(StatsConstants.PROPERTY_RETRY_COUNT, retry != null? ++retry : 1);
-        }).maximumRedeliveries(2));
+        }).maximumRedeliveries(3));
 
         from(StatsConstants.ENDPOINT_GET_STATS)
 
@@ -35,6 +35,7 @@ public class StatsIntegrationRoutes extends RouteBuilder {
                 .process(exchange -> {
                     String countryCode = exchange.getIn().getHeader(StatsConstants.HEADER_COUNTRY_CODE, String.class);
 
+                    exchange.setProperty(StatsConstants.PROPERTY_COUNTRY_CODE, countryCode);
                     exchange.setProperty(StatsConstants.PROPERTY_STATS_PROVIDERS, statsProviderRepository.findAllByCountryOrGlobal(countryCode));
                 })
 

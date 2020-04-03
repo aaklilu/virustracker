@@ -44,8 +44,10 @@ public class DailyStats {
 
     private LocalDateTime date;
     private Integer totalCases;
+    private Integer totalActiveCases;
     private Integer totalDeaths;
     private Integer totalRecovered;
+    private Integer rank;
 
     private Integer newCases;
     private Integer newDeaths;

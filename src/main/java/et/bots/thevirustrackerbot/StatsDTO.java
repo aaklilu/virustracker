@@ -15,6 +15,10 @@ public class StatsDTO {
     private String longitude;
     private Date updatedOn;
     private Integer totalCases;
+    @Builder.Default
+    private Integer totalActiveCases=0;
+    @Builder.Default
+    private Integer rank=0;
     private Integer totalDeaths;
     private Integer totalRecovered;
     @Builder.Default

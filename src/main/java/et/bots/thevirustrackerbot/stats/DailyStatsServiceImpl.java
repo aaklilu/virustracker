@@ -69,12 +69,14 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                     .collect(Collectors.groupingBy(StatsDTO::getCountryCode, Collectors.collectingAndThen(Collectors.toList(), list -> StatsDTO
                             .builder()
                             .countryCode(list.stream().findFirst().get().getCountryCode())
+                            .rank(list.stream().findFirst().get().getRank())
                             .sourceName(list.stream().findFirst().get().getSourceName())
                             .sourceType(list.stream().findFirst().get().getSourceType())
                             .newCases(list.stream().mapToInt(StatsDTO::getNewCases).sum())
                             .newDeaths( list.stream().mapToInt(StatsDTO::getNewDeaths).sum())
                             .newRecoveries( list.stream().mapToInt(StatsDTO::getNewRecoveries).sum())
                             .totalCases( list.stream().mapToInt(StatsDTO::getTotalCases).sum())
+                            .totalActiveCases( list.stream().mapToInt(StatsDTO::getTotalActiveCases).sum())
                             .totalDeaths( list.stream().mapToInt(StatsDTO::getTotalDeaths).sum())
                             .totalRecovered( list.stream().mapToInt(StatsDTO::getTotalRecovered).sum())
                             .build())))
@@ -97,6 +99,8 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                                     .newCases(0)
                                     .newDeaths(0)
                                     .newRecoveries(0)
+                                    .rank(statsDTO.getRank())
+                                    .totalActiveCases(statsDTO.getTotalActiveCases())
                                     .sourceName(statsDTO.getSourceName())
                                     .build());
 
@@ -106,15 +110,17 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                                 || statsDTO.getTotalRecovered() > existing.get().getTotalRecovered()){
 
                             DailyStats dailyStats = existing.get();
-                            dailyStats.setNewCases(dailyStats.getNewCases()+ (statsDTO.getTotalCases() - dailyStats.getTotalCases()));
-                            dailyStats.setNewDeaths(dailyStats.getNewDeaths()+ (statsDTO.getTotalDeaths() - dailyStats.getTotalDeaths()));
-                            dailyStats.setNewRecoveries(dailyStats.getNewRecoveries()+ (statsDTO.getTotalRecovered() - dailyStats.getTotalRecovered()));
+                            dailyStats.setNewCases(statsDTO.getNewCases() != 0? statsDTO.getNewCases(): dailyStats.getNewCases()+ (statsDTO.getTotalCases() - dailyStats.getTotalCases()));
+                            dailyStats.setNewDeaths(statsDTO.getNewDeaths() != 0? statsDTO.getNewDeaths(): dailyStats.getNewDeaths()+ (statsDTO.getTotalDeaths() - dailyStats.getTotalDeaths()));
+                            dailyStats.setNewRecoveries(statsDTO.getNewRecoveries() != 0? statsDTO.getNewRecoveries(): dailyStats.getNewRecoveries()+ (statsDTO.getTotalRecovered() - dailyStats.getTotalRecovered()));
 
                             dailyStats.setTotalCases(statsDTO.getTotalCases());
                             dailyStats.setTotalDeaths(statsDTO.getTotalDeaths());
                             dailyStats.setTotalRecovered(statsDTO.getTotalRecovered());
                             dailyStats.setSourceName(statsDTO.getSourceName());
+                            dailyStats.setTotalActiveCases(statsDTO.getTotalActiveCases() != 0? statsDTO.getTotalActiveCases(): dailyStats.getTotalCases() - dailyStats.getTotalRecovered());
 
+                            dailyStats.setRank(statsDTO.getRank());
                             this.update(dailyStats);
 
                             //update the dto as well...it doesn't contail.n vales for NEW cases as its calculated here
@@ -152,8 +158,10 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                             .newDeaths(dailyStats.getNewDeaths())
                             .newRecoveries(dailyStats.getNewRecoveries())
                             .totalCases(dailyStats.getTotalCases())
+                            .totalActiveCases(dailyStats.getTotalActiveCases())
                             .totalDeaths(dailyStats.getTotalDeaths())
                             .totalRecovered(dailyStats.getTotalRecovered())
+                            .rank(dailyStats.getRank())
                             .sourceName(dailyStats.getSourceName())
                             .sourceType(dailyStats.getSourceType())
                             .build();

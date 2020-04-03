@@ -95,9 +95,16 @@ public class SubscriberEventHandlers {
                             "\r\n" +
                             messageSource.getMessage("status.update.confirmed", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getTotalCases() +
                             "\r\n" +
+                            messageSource.getMessage("status.update.active", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getTotalActiveCases() +
+                            "\r\n" +
                             messageSource.getMessage("status.update.deaths", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getTotalDeaths() +
                             "\r\n" +
                             messageSource.getMessage("status.update.recovered", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getTotalRecovered();
+
+                   if(statsDTO.getRank() >0) {
+                       text += "\r\n\r\n" +
+                               messageSource.getMessage("status.update.rank", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getRank();
+                   }
                 }
 
         return Reaction.builder().text(text).subscriber(subscriber).optionVector(optionVector).build();

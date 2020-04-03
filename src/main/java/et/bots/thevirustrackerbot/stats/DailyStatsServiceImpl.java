@@ -6,6 +6,8 @@ import et.bots.thevirustrackerbot.event.v1.StatsUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.ProducerTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
@@ -27,8 +29,8 @@ public class DailyStatsServiceImpl implements DailyStatsService {
     private final ProducerTemplate eventProducerTemplate;
 
     @Override
-    public Iterable<DailyStats> findAll() {
-        return dailyStatsRepository.findAll();
+    public Page<DailyStats> findAll(Pageable pageable) {
+        return dailyStatsRepository.findAll(pageable);
     }
 
     @Override
@@ -162,5 +164,16 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                 }
             }
         }
+    }
+
+    @Override
+    public long count() {
+        return dailyStatsRepository.count();
+    }
+
+    @Override
+    public void deleteAllExcept(List<String> ids) {
+
+        dailyStatsRepository.deleteAllExcept(ids);
     }
 }

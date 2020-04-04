@@ -101,6 +101,11 @@ public class SubscriberEventHandlers {
                             "\r\n" +
                             messageSource.getMessage("status.update.recovered", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getTotalRecovered();
 
+                   if(statsDTO.getTotalSeriousCases() != null && statsDTO.getTotalSeriousCases() >0) {
+                       text += "\r\n" +
+                               messageSource.getMessage("status.update.serious", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getTotalSeriousCases();
+                   }
+
                    if(statsDTO.getRank() >0) {
                        text += "\r\n\r\n" +
                                messageSource.getMessage("status.update.rank", new Object[]{}, LocaleContextHolder.getLocale()) + ": " + statsDTO.getRank();

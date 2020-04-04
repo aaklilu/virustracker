@@ -12,9 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,6 +36,7 @@ public class TvtGetCountryStatsResponseTranslator implements GetCountryStatsResp
                     .builder()
                     .countryCode(countrydatum.getInfo().getCode())
                     .totalCases(countrydatum.getTotalCases())
+                    .totalSeriousCases(countrydatum.getTotalSeriousCases())
                     .totalDeaths(countrydatum.getTotalDeaths())
                     .totalRecovered(countrydatum.getTotalRecovered())
                     .totalActiveCases(countrydatum.getTotalActiveCases())
@@ -58,6 +57,7 @@ public class TvtGetCountryStatsResponseTranslator implements GetCountryStatsResp
                 .totalDeaths(countrydatum.getTotalDeaths())
                 .totalRecovered(countrydatum.getTotalRecovered())
                 .totalActiveCases(countrydatum.getTotalActiveCases())
+                .totalSeriousCases(countrydatum.getTotalSeriousCases())
                 .newCases(countrydatum.getTotalNewCasesToday())
                 .newDeaths(countrydatum.getTotalNewDeathsToday())
                 .rank(countrydatum.getTotalDangerRank())

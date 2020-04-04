@@ -77,6 +77,7 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                             .newRecoveries( list.stream().mapToInt(StatsDTO::getNewRecoveries).sum())
                             .totalCases( list.stream().mapToInt(StatsDTO::getTotalCases).sum())
                             .totalActiveCases( list.stream().mapToInt(StatsDTO::getTotalActiveCases).sum())
+                            .totalSeriousCases( list.stream().mapToInt(StatsDTO::getTotalSeriousCases).sum())
                             .totalDeaths( list.stream().mapToInt(StatsDTO::getTotalDeaths).sum())
                             .totalRecovered( list.stream().mapToInt(StatsDTO::getTotalRecovered).sum())
                             .build())))
@@ -101,13 +102,15 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                                     .newRecoveries(0)
                                     .rank(statsDTO.getRank())
                                     .totalActiveCases(statsDTO.getTotalActiveCases())
+                                    .totalSeriousCases(statsDTO.getTotalSeriousCases())
                                     .sourceName(statsDTO.getSourceName())
                                     .build());
 
                             eventProducerTemplate.sendBody(StatsUpdatedEvent.builder().statsDTO(statsDTO).build());
                         }else if(statsDTO.getTotalCases() > existing.get().getTotalCases()
                                 || statsDTO.getTotalDeaths() > existing.get().getTotalDeaths()
-                                || statsDTO.getTotalRecovered() > existing.get().getTotalRecovered()){
+                                || statsDTO.getTotalRecovered() > existing.get().getTotalRecovered()
+                                || ((statsDTO.getTotalSeriousCases() != null? statsDTO.getTotalSeriousCases(): 0) > (existing.get().getTotalSeriousCases() != null? existing.get().getTotalSeriousCases(): 0))){
 
                             DailyStats dailyStats = existing.get();
                             dailyStats.setNewCases(statsDTO.getNewCases() != 0? statsDTO.getNewCases(): dailyStats.getNewCases()+ (statsDTO.getTotalCases() - dailyStats.getTotalCases()));
@@ -119,6 +122,7 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                             dailyStats.setTotalRecovered(statsDTO.getTotalRecovered());
                             dailyStats.setSourceName(statsDTO.getSourceName());
                             dailyStats.setTotalActiveCases(statsDTO.getTotalActiveCases() != 0? statsDTO.getTotalActiveCases(): dailyStats.getTotalCases() - dailyStats.getTotalRecovered());
+                             dailyStats.setTotalSeriousCases(statsDTO.getTotalSeriousCases());
 
                             dailyStats.setRank(statsDTO.getRank());
                             this.update(dailyStats);
@@ -141,6 +145,7 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                             statsDTO.setTotalRecovered(dailyStats.getTotalRecovered());
                             statsDTO.setSourceType(dailyStats.getSourceType());
                             statsDTO.setSourceName(dailyStats.getSourceName());
+                            dailyStats.setTotalSeriousCases(statsDTO.getTotalSeriousCases());
 
                             eventProducerTemplate.sendBody(StatsUpdatedEvent.builder().subscriberId(subscriberId).statsDTO(statsDTO).build());
                         }
@@ -159,6 +164,7 @@ public class DailyStatsServiceImpl implements DailyStatsService {
                             .newRecoveries(dailyStats.getNewRecoveries())
                             .totalCases(dailyStats.getTotalCases())
                             .totalActiveCases(dailyStats.getTotalActiveCases())
+                            .totalSeriousCases(dailyStats.getTotalSeriousCases())
                             .totalDeaths(dailyStats.getTotalDeaths())
                             .totalRecovered(dailyStats.getTotalRecovered())
                             .rank(dailyStats.getRank())
